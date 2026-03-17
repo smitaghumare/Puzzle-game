@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AuraBit Kids | Fun Learning</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Fredoka+One&family=Lexend:wght@400;800&display=swap');
+        
+        :root {
+            --primary: #FF6B6B; /* Soft Red */
+            --secondary: #4ECDC4; /* Fresh Teal */
+            --yellow: #FFE66D; /* Bright Yellow */
+            --purple: #A29BFE; /* Soft Purple */
+            --white: #FFFFFF;
+            --text: #2D3436;
+        }
+
+        * { box-sizing: border-box; font-family: 'Lexend', sans-serif; transition: 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+
+        body {
+            background: linear-gradient(135deg, #fdfbfb 0%, #ebedee 100%);
+            margin: 0; display: flex; justify-content: center; align-items: center; min-height: 100vh; color: var(--text); overflow: hidden;
+        }
+
+        /* Fun Bubbly Card */
+        .app-card { 
+            background: var(--white); 
+            width: 92%; max-width: 400px; 
+            padding: 25px; 
+            border-radius: 45px; 
+            text-align: center; 
+            box-shadow: 0 20px 0 rgba(0,0,0,0.05), 0 30px 50px rgba(0,0,0,0.1);
+            border: 8px solid var(--purple);
+            position: relative;
+        }
+
+        .top-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; background: #f0f0f0; padding: 10px 20px; border-radius: 30px; }
+        .score-val { font-family: 'Fredoka One'; color: var(--primary); font-size: 1.2rem; }
+        
+        .music-toggle { cursor: pointer; font-size: 1.5rem; background: none; border: none; }
+
+        .brand-logo { 
+            width: 60px; height: 60px; 
+            background: var(--yellow); 
+            border-radius: 20px; 
+            display: flex; align-items: center; justify-content: center; 
+            font-family: 'Fredoka One'; font-size: 2rem; color: var(--primary);
+            margin: 0 auto 10px; border: 4px solid var(--text);
+            box-shadow: 4px 4px 0 var(--text);
+        }
+
+        /* Timer Circle */
+        .timer-container { position: relative; width: 70px; height: 70px; margin: 0 auto 15px; }
+        .timer-svg { transform: rotate(-90deg); width: 70px; height: 70px; }
+        .timer-bg { fill: none; stroke: #eee; stroke-width: 8; }
+        .timer-path { fill: none; stroke: var(--secondary); stroke-width: 8; stroke-linecap: round; }
+        .timer-text { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-family: 'Fredoka One'; font-size: 1.2rem; }
+
+        .question-box { 
+            background: #F9F9F9; padding: 20px; border-radius: 30px; 
+            min-height: 150px; display: flex; flex-direction: column; 
+            align-items: center; justify-content: center; 
+            margin-bottom: 15px; border: 3px dashed var(--purple);
+        }
+        
+        .q-icon { font-size: 2.5rem; margin-bottom: 5px; }
+        #q-text { font-weight: 800; font-size: 1.2rem; color: var(--text); }
+
+        input { 
+            width: 100%; padding: 18px; border: 3px solid #eee; 
+            border-radius: 25px; background: #fff; color: var(--text); 
+            font-size: 1.2rem; font-weight: 800; text-align: center; outline: none; margin-bottom: 15px; 
+        }
+        input:focus { border-color: var(--secondary); }
+
+        .btn-main { 
+            background: var(--primary); color: white; padding: 18px; 
+            border: none; border-radius: 25px; font-weight: 800; 
+            cursor: pointer; width: 100%; font-size: 1.1rem;
+            box-shadow: 0 6px 0 #d63031; margin-bottom: 5px;
+        }
+        .btn-main:active { transform: translateY(4px); box-shadow: 0 2px 0 #d63031; }
+
+        .btn-hint { color: var(--secondary); background: none; border: none; font-weight: 800; cursor: pointer; text-decoration: underline; margin-top: 5px; }
+
+        .correct-reveal { color: var(--secondary); font-weight: 800; font-size: 0.9rem; margin-top: 10px; }
+        .hidden { display: none; }
+        
+        /* Level and Finish screens */
+        .celebration { font-size: 4rem; display: block; margin-bottom: 10px; }
+    </style>
+</head>
+<body>
+
+<div class="app-card">
+    <div class="top-bar">
+        <div class="score-box">
+            <span style="font-size: 0.7rem; font-weight: 800;">POINTS</span><br>
+            <span class="score-val" id="cur-score">0</span>
+        </div>
+        <button class="music-toggle" onclick="toggleMusic()" id="m-btn">🎵</button>
+    </div>
+
+    <div id="start-view">
+        <div class="brand-logo">A</div>
+        <h1 style="font-family: 'Fredoka One'; margin: 0; color: var(--purple);">AURABIT</h1>
+        <p style="font-weight: 800; color: var(--secondary); margin-bottom: 25px;">Fun Brain Training!</p>
+        <input type="text" id="p-name" placeholder="YOUR NAME">
+        <button class="btn-main" onclick="initGame()">START ADVENTURE</button>
+    </div>
+
+    <div id="game-view" class="hidden">
+        <div style="display: flex; justify-content: space-between; font-weight: 800; font-size: 0.8rem; margin-bottom: 10px;">
+            <span style="color:var(--purple)">SECTOR <span id="cur-lvl">1</span></span>
+            <span style="color:var(--primary)">QUIZ <span id="q-prog">1</span>/10</span>
+        </div>
+        
+        <div class="timer-container">
+            <svg class="timer-svg"><circle class="timer-bg" cx="35" cy="35" r="30"></circle><circle id="timer-path" class="timer-path" cx="35" cy="35" r="30" stroke-dasharray="188.5" stroke-dashoffset="0"></circle></svg>
+            <span id="timer-text" class="timer-text">15</span>
+        </div>
+
+        <div id="feedback" style="height: 20px; font-weight: 800; margin-bottom: 5px;"></div>
+        
+        <div class="question-box">
+            <span id="q-icon" class="q-icon"></span>
+            <div id="q-text">Loading...</div>
+            <div id="correct-answer-reveal" class="correct-reveal hidden"></div>
+        </div>
+
+        <input type="text" id="ans-in" placeholder="ANSWER HERE" autocomplete="off">
+        <button class="btn-main" onclick="check()">CHECK!</button>
+        <button class="btn-hint" id="hint-btn" onclick="showHint()">Need a Hint? (-2)</button>
+    </div>
+
+    <div id="level-view" class="hidden">
+        <span class="celebration">🌟</span>
+        <h2 style="font-family: 'Fredoka One'; color: var(--purple);">LEVEL UP!</h2>
+        <p>Your Score: <span id="lvl-score-disp" style="font-weight: 800; color: var(--primary);">0</span></p>
+        <button class="btn-main" id="next-btn">NEXT LEVEL</button>
+    </div>
+
+    <div id="finish-view" class="hidden">
+        <span class="celebration">🏆</span>
+        <h2 style="font-family: 'Fredoka One'; color: var(--purple);">YOU ARE A STAR!</h2>
+        <div id="final-score-disp" style="font-size: 2.5rem; font-weight: 800; color: var(--primary);">0</div>
+        <div id="rank-badge" style="margin-bottom: 20px; font-weight: 800;">SUPER GENIUS</div>
+        <button class="btn-main" onclick="location.reload()">PLAY AGAIN</button>
+    </div>
+</div>
+
+<script>
+    let score = 0, currentLevel = 1, qIdx = 0, timer, timeLeft = 15, isMusicOn = true, audioCtx, musicInterval;
+    
+    const db = {
+        1: [
+            {q: "10 + 5?", a: "15", h: "Ten and Five", i: "➕"}, {q: "Double 4?", a: "8", h: "4 + 4", i: "🔢"}, {q: "2 x 5?", a: "10", h: "Two fives", i: "✖️"}, {q: "3, 4, 5, ?", a: "6", h: "Next number", i: "🆙"}, {q: "How many legs on a cat?", a: "4", h: "Meow!", i: "🐱"},
+            {q: "Half of 10?", a: "5", h: "High Five!", i: "🖐️"}, {q: "12 - 2?", a: "10", h: "One Zero", i: "➖"}, {q: "Color of grass?", a: "green", h: "Starts with G", i: "🌱"}, {q: "5 + 5 + 5?", a: "15", h: "Three fives", i: "📈"}, {q: "3 x 1?", a: "3", h: "It stays same", i: "📏"}
+        ],
+        2: [
+            {q: "Tells the time?", a: "clock", h: "Tick Tock", i: "🕰️"}, {q: "Opposite of Up?", a: "down", h: "To the floor", i: "⬇️"}, {q: "10, 20, 30, ?", a: "40", h: "Count by tens", i: "🔟"}, {q: "Where is the Eiffel Tower?", a: "paris", h: "In France", i: "🗼"}, {q: "2 + 2 + 2?", a: "6", h: "Three twos", i: "🎲"},
+            {q: "Legs of 2 dogs?", a: "8", h: "2 x 4", i: "🐶"}, {q: "Month after January?", a: "february", h: "Month 2", i: "📅"}, {q: "Fire is...?", a: "hot", h: "Not cold", i: "🔥"}, {q: "5, 10, 15, ?", a: "20", h: "Fives", i: "📶"}, {q: "Sky color?", a: "blue", h: "Like ocean", i: "☁️"}
+        ],
+        3: [{q: "100 / 2?", a: "50", h: "Fifty", i: "🍰"}, {q: "3x = 9. x=?", a: "3", h: "3 times 3", i: "🧬"}, {q: "Has leaves & bark?", a: "tree", h: "Grows outside", i: "🌳"}, {q: "2, 4, 8, ?", a: "16", h: "Double 8", i: "⚡"}, {q: "Square root 25?", a: "5", h: "5x5", i: "💎"}, {q: "Hexagon sides?", a: "6", h: "Six", i: "🐝"}, {q: "0, 1, 1, 2, ?", a: "3", h: "1+2", i: "🌀"}, {q: "Black & white keys?", a: "piano", h: "Music item", i: "🎹"}, {q: "20 x 3?", a: "60", h: "6-0", i: "🏹"}, {q: "5 x 5?", a: "25", h: "Quarter", i: "🏗️"}],
+        4: [{q: "Square angle?", a: "90", h: "Right angle", i: "📐"}, {q: "Is 7 prime?", a: "yes", h: "Yes/No", i: "🎖️"}, {q: "Day after Monday?", a: "tuesday", h: "Day 2", i: "🌍"}, {q: "3 x 4?", a: "12", h: "A dozen", i: "⏳"}, {q: "Ice is...?", a: "cold", h: "Brrr", i: "❄️"}, {q: "50, 45, 40, ?", a: "35", h: "Minus 5", i: "🎢"}, {q: "3! (3x2x1)?", a: "6", h: "Factorial", i: "❗"}, {q: "Triangle sides?", a: "3", h: "Three", i: "⛺"}, {q: "For your hair?", a: "comb", h: "Brush", i: "💈"}, {q: "Half of 100?", a: "50", h: "Fifty", i: "🍕"}],
+        5: [{q: "10 x 10?", a: "100", h: "Century", i: "🌌"}, {q: "If 1=2, 2=4, 5=?", a: "10", h: "Double it", i: "🤡"}, {q: "Days in a week?", a: "7", h: "Lucky 7", i: "📅"}, {q: "A, B, C, D, ?", a: "e", h: "Next letter", i: "🔢"}, {q: "Water freezes at (C)?", a: "0", h: "Zero", i: "⚖️"}, {q: "Binary 1?", a: "1", h: "One", i: "💻"}, {q: "10, 30, 50, ?", a: "70", h: "Add 20", i: "🚀"}, {q: "Not a lie?", a: "truth", h: "Honest", i: "🤝"}, {q: "First number?", a: "1", h: "One", i: "🔗"}, {q: "6 x 6?", a: "36", h: "Three-Six", i: "🧊"}]
+    };
+
+    function initGame() {
+        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        document.getElementById('start-view').classList.add('hidden');
+        document.getElementById('game-view').classList.remove('hidden');
+        if(isMusicOn) startMusicLoop();
+        loadQ();
+    }
+
+    function startMusicLoop() {
+        if(musicInterval) clearInterval(musicInterval);
+        musicInterval = setInterval(() => {
+            playNote(261.63, 0); // C4
+            playNote(329.63, 0.2); // E4
+            playNote(392.00, 0.4); // G4
+            playNote(523.25, 0.6); // C5
+        }, 800);
+    }
+
+    function playNote(freq, delay) {
+        if(!isMusicOn) return;
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(freq, audioCtx.currentTime + delay);
+        gain.gain.setValueAtTime(0.05, audioCtx.currentTime + delay);
+        gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + delay + 0.3);
+        osc.connect(gain); gain.connect(audioCtx.destination);
+        osc.start(audioCtx.currentTime + delay); osc.stop(audioCtx.currentTime + delay + 0.3);
+    }
+
+    function toggleMusic() {
+        isMusicOn = !isMusicOn;
+        document.getElementById('m-btn').innerText = isMusicOn ? "🎵" : "🔇";
+        if(isMusicOn && audioCtx) startMusicLoop();
+        else clearInterval(musicInterval);
+    }
+
+    function loadQ() {
+        if (qIdx >= 10) { showLevelUp(); return; }
+        const item = db[currentLevel][qIdx];
+        document.getElementById('cur-lvl').innerText = currentLevel;
+        document.getElementById('q-prog').innerText = qIdx + 1;
+        document.getElementById('cur-score').innerText = score;
+        document.getElementById('q-icon').innerText = item.i;
+        document.getElementById('q-text').innerText = item.q;
+        document.getElementById('ans-in').value = "";
+        document.getElementById('feedback').innerText = "";
+        document.getElementById('correct-answer-reveal').classList.add('hidden');
+        document.getElementById('ans-in').focus();
+        timeLeft = 15; updateTimer();
+        clearInterval(timer);
+        timer = setInterval(() => { timeLeft--; updateTimer(); if (timeLeft <= 0) next(false, item.a); }, 1000);
+    }
+
+    function updateTimer() {
+        document.getElementById('timer-text').innerText = timeLeft;
+        document.getElementById('timer-path').style.strokeDashoffset = 188.5 - (timeLeft / 15) * 188.5;
+        document.getElementById('timer-path').style.stroke = timeLeft < 5 ? "var(--primary)" : "var(--secondary)";
+    }
+
+    function showHint() {
+        const h = db[currentLevel][qIdx].h;
+        alert("HINT: " + h);
+        score = Math.max(0, score - 2); document.getElementById('cur-score').innerText = score;
+    }
+
+    function check() {
+        const user = document.getElementById('ans-in').value.trim().toLowerCase();
+        const correct = db[currentLevel][qIdx].a;
+        if (user === correct) { score += 10; next(true); } 
+        else { next(false, correct); }
+    }
+
+    function next(isCorrect, answer) {
+        clearInterval(timer);
+        const fb = document.getElementById('feedback');
+        const reveal = document.getElementById('correct-answer-reveal');
+        if (isCorrect) { fb.innerText = "AMAZING! ⭐"; fb.style.color = "var(--secondary)"; } 
+        else {
+            fb.innerText = "OOPS! 😮"; fb.style.color = "var(--primary)";
+            reveal.innerText = "THE ANSWER WAS: " + (answer || "TIMEOUT").toUpperCase();
+            reveal.classList.remove('hidden');
+        }
+        setTimeout(() => { qIdx++; loadQ(); }, isCorrect ? 800 : 2500);
+    }
+
+    function showLevelUp() {
+        document.getElementById('game-view').classList.add('hidden');
+        document.getElementById('level-view').classList.remove('hidden');
+        document.getElementById('lvl-score-disp').innerText = score;
+        document.getElementById('next-btn').onclick = () => {
+            currentLevel++; qIdx = 0;
+            if (currentLevel > 5) finishGame();
+            else { document.getElementById('level-view').classList.add('hidden'); document.getElementById('game-view').classList.remove('hidden'); loadQ(); }
+        };
+    }
+
+    function finishGame() {
+        document.getElementById('level-view').classList.add('hidden');
+        document.getElementById('finish-view').classList.remove('hidden');
+        document.getElementById('final-score-disp').innerText = score;
+        document.getElementById('rank-badge').innerText = score > 400 ? "ULTRA GENIUS!" : "KNOWLEDGE HERO!";
+    }
+
+    document.getElementById('ans-in').addEventListener("keyup", (e) => { if(e.key === "Enter") check(); });
+</script>
+</body>
+</html>
